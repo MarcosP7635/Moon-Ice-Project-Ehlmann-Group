@@ -1,0 +1,12 @@
+def makeGraph(wehAverage, NewLats):
+    fit = np.polyfit(NewLats, wehAverage, 4)
+    #otherfit1 = stats.linregress(NewLats, wehAverage)
+    #print("slope: ", otherfit1[0], " intercept: ", otherfit1[1], " r-value: ", otherfit1[2], " p-value: ", otherfit1[3], " stderror: ", otherfit1[4])
+    print(fit)
+    plt.plot(NewLats, wehAverage, 'o')
+    plt.plot(NewLats, fit[0]*(NewLats**4)+fit[1]*(NewLats**3)+fit[2]*(NewLats**2)+fit[3]*(NewLats)+fit[0], label = ('Quartic fit, WEH = (latitude) - '))
+    plt.xlabel('Latitude in degrees')
+    plt.ylabel('Average Water Equivalent Hydrogen in ppm')
+    plt.title('Lunar Prospector Neutron Spectrometer South Pole Results')
+    plt.legend()
+    plt.show()
