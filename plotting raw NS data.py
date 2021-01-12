@@ -147,6 +147,6 @@ for iteration in range(int(LPNSarray.shape[0]/(720*8))): #get the entire south p
 print(LPNSarray)
 combinedArray = [[0]*28800, [0]*28800]
 plt.scatter(LENDbinnedArray, LPNSarray[:,0])
-plt.xlabel('LEND ppm')
-plt.ylabel(r'Lunar Prospector wt%')
+plt.xlabel('LEND Enriched Hydrogen (ppm)')
+plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
 plt.show()
