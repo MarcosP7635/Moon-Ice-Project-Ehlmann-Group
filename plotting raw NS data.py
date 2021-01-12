@@ -14,8 +14,8 @@ import struct
 Instead of averaging, I'm going to bin the LEND data by the LPNS data.
 These are the raw data I was sent by Sanin and Lawrence.
 '''
-LENDarray = np.asarray(pd.read_csv('C:\\Users\\engin\\LEND South.csv'))
-LPNSarray = np.asarray(pd.read_csv('C:\\Users\\engin\\Polar filtered Lunar Prospector.csv'))
+LENDarray = np.asarray(pd.read_csv('C:\\Users\\engin\\LENDSouth.csv'))
+LPNSarray = np.asarray(pd.read_csv('C:\\Users\\engin\\PolarfilteredLunarProspector.csv'))
 '''print(LENDarray.dtype)#float64
 print(LPNSarray.dtype)#float64 '''
 #print(LPNSarray[28800,])
@@ -130,12 +130,23 @@ for initial in range(720):
     break  # only executed if the inner loop DID break
 '''
 LENDbinnedArray = [0]*28800
-#I'll do one longitude at a time
+#I'll do one LPNS at a time
+'''
+The outermost loop is the number of LPNS bands. (40)
+'''
 for iteration in range(int(LPNSarray.shape[0]/(720*8))): #get the entire south pole
     for initial in range(720): #get a full LEND band
-        for row in range(8): #group 8 LEND bands to correspond to a LEND band
-            if not LEND[,2]==0:
-                added = added+1
-                LENDbinnedArray[(iteration*720)+(initial)] = LENDbinnedArray[(iteration*720)+(initial)] + LEND[(iteration*720)+(720*row)+initial,2]
-        added=0
-        LENDbinnedArray[(iteration*720*8)+(initial)] = LENDbinnedArray[(iteration*720*8)+(initial)]/8
+        for row in range(8): #group 8 LEND bands to correspond to a LPNS band
+            #if not LEND[,2]==0:
+                #added = added+1
+                itAddOn = iteration*720*8
+                inAddOn = initial*8
+                LENDbinnedArray[int((itAddOn+inAddOn)/8)] = LENDbinnedArray[int((itAddOn+inAddOn)/8)] + LENDarray[itAddOn+inAddOn+row,2]
+        #added=0
+        LENDbinnedArray[int((itAddOn+inAddOn)/8)] = LENDbinnedArray[int((itAddOn+inAddOn)/8)]/8
+print(LPNSarray)
+combinedArray = [[0]*28800, [0]*28800]
+plt.scatter(LENDbinnedArray, LPNSarray[:,0])
+plt.xlabel('LEND ppm')
+plt.ylabel(r'Lunar Prospector wt%')
+plt.show()
