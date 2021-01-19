@@ -11,6 +11,8 @@ import rasterio
 from rasterio.plot import show
 import struct
 from matplotlib.colors import LogNorm
+wehAnalysis = "C:\\Users\\engin\\Documents\\GitHub\Moon-Ice-Project-Ehlmann-Group\\weh_analysis_from_lawrence.py"
+exec(open(wehAnalysis).read())
 '''
 Instead of averaging, I'm going to bin the LEND data by the LPNS data.
 These are the raw data I was sent by Sanin and Lawrence.
@@ -171,17 +173,35 @@ print("zeros are at ", zeroIndices)
 #now to convert the ppm to wt%. 1wt% = 1111.11111ppm.
 #Thus we need to divide the LPNS data by this number
 combinedArray[1] = combinedArray[1]/(50/.045)
-#now for a dummy line of y=x
-
+'''now for a line of y=x. The max value of either dataset is .12 wt% so I'll
+use an array that goes uniformly from 0 to that value. then I want to sort
+the array by ascending second row (LPNS), thus sort by columns
+'''
+combinedArray = combinedArray.sort(lambda x:x[1])
+#now I need to find the indices where LPNS changes and average those bins
+indices = wehAnalysis.findlatchanges(combinedArray[1])
+#now average each lend measurement binned by LPNS
+combinedArray[0] = wehAnalysis.findAverageWEH(indices, combinedArray[0])
+sortedLPNS = np.array(combinedArray[1])
+combinedArray[1] = sortedLPNS[indices]
+print("LEND array is now length ", len(combinedArray[0]))
+print("LPNS array is now length ", len(combinedArray[1]))
+plt.scatter(combinedArray[0], combinedArray[1],
+ label = "Binned Data from LEND and Lunar Prospector")
+secondLine = np.array(range(28800))
+secondLine = secondLine+1
+secondLine = secondLine*.5/28800
+secondLine = secondLine
+plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%")
 plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
-plt.scatter(combinedArray[0], combinedArray[1])
 plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
 plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
+plt.legend()
 plt.show()
 fig, ax = plt.subplots()
-h = ax.hist2d(combinedArray[0],  combinedArray[1], bins=40, norm=LogNorm())
+h = ax.hist2d(combinedArray[0],  combinedArray[1], bins=50)
 fig.colorbar(h[3], ax=ax)
 plt.title("Density plot of LEND and Lunar Prospector Hydrogen Abundance")
 plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
 plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
-plt.show()
+#plt.show()
