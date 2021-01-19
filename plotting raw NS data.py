@@ -134,19 +134,36 @@ LENDbinnedArray = [0]*28800
 '''
 The outermost loop is the number of LPNS bands. (40)
 '''
-for iteration in range(int(LPNSarray.shape[0]/(720*8))): #get the entire south pole
+added, zeros, addedCounts, unbinnedZero = 0,0,0,0
+for iteration in range(int(LPNSarray.shape[0]/(720))): #get the entire south pole
     for initial in range(720): #get a full LEND band
         for row in range(8): #group 8 LEND bands to correspond to a LPNS band
-            #if not LEND[,2]==0:
-                #added = added+1
-                itAddOn = iteration*720*8
-                inAddOn = initial*8
-                LENDbinnedArray[int((itAddOn+inAddOn)/8)] = LENDbinnedArray[int((itAddOn+inAddOn)/8)] + LENDarray[itAddOn+inAddOn+row,2]
-        #added=0
-        LENDbinnedArray[int((itAddOn+inAddOn)/8)] = LENDbinnedArray[int((itAddOn+inAddOn)/8)]/8
+            itAddOn = iteration*720*8
+            inAddOn = initial*8
+            if (itAddOn+inAddOn+row < 230399):
+                if (not LENDarray[itAddOn+inAddOn+row,2]==0):
+                    added = added+1
+                    LENDbinnedArray[int((itAddOn+inAddOn)/8)] = LENDbinnedArray[int((itAddOn+inAddOn)/8)] + LENDarray[itAddOn+inAddOn+row,2]
+                else:
+                    unbinnedZero = unbinnedZero+1
+        if(not added==0):
+            addedCounts = addedCounts+1
+            LENDbinnedArray[int((itAddOn+inAddOn)/8)] = LENDbinnedArray[int((itAddOn+inAddOn)/8)]/added
+            added=0
+print("final index after loop ", int((itAddOn+inAddOn+row)))
 print(LPNSarray)
 combinedArray = [[0]*28800, [0]*28800]
-plt.scatter(LENDbinnedArray, LPNSarray[:,0])
+combinedArray [0] = LENDbinnedArray
+combinedArray [1] = LPNSarray[:,0]
+for a in range(len(LENDbinnedArray)):
+    if LENDbinnedArray[a]==0:
+        zeros = zeros+1
+print(zeros, " zeroes and addedCounts is ", addedCounts, " and ", unbinnedZero, " unbinnedZeros" )
+print(len(LENDbinnedArray))
+print(LENDbinnedArray)
+#now to filter out the 0s
+
+plt.scatter(combinedArray[0], combinedArray[1])
 plt.xlabel('LEND Enriched Hydrogen (ppm)')
 plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
 plt.show()
