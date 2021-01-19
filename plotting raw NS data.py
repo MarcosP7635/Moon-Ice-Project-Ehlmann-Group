@@ -11,8 +11,8 @@ import rasterio
 from rasterio.plot import show
 import struct
 from matplotlib.colors import LogNorm
-wehAnalysis = "C:\\Users\\engin\\Documents\\GitHub\Moon-Ice-Project-Ehlmann-Group\\weh_analysis_from_lawrence.py"
-exec(open(wehAnalysis).read())
+#wehAnalysis = "C:\\Users\\engin\\Documents\\GitHub\Moon-Ice-Project-Ehlmann-Group\\weh_analysis_from_lawrence.py"
+#exec(open(wehAnalysis).read())
 '''
 Instead of averaging, I'm going to bin the LEND data by the LPNS data.
 These are the raw data I was sent by Sanin and Lawrence.
@@ -27,9 +27,7 @@ LPNSarray = LPNSarray[0:28800,:]
 #print(LENDarray[0][2]) #wt%
 #print(LPNSarray[0][0]) #WEH ppm
 LENDlonglat = LENDarray[:,0:2]
-print(LENDlonglat)
 LPNSlonglat = LPNSarray[:,1:3]
-print(LPNSlonglat)
 LENDaverageArray = [0]*28800
 group1,group2,group3,group4,group5,group6,group7,group8 = [0]*28800, [0]*28800, [0]*28800, [0]*28800,  [0]*28800, [0]*28800, [0]*28800, [0]*28800
 for i in range(28799):
@@ -44,8 +42,6 @@ for i in range(28799):
     for smalli in range(8):
         LENDaverageArray[i] = LENDaverageArray[i]+LENDarray[i*8+smalli,2]
     LENDaverageArray[i] = LENDaverageArray[i]/8
-print(LENDlonglat.shape) #(230399, 2)
-print(LPNSlonglat.shape) #(230399, 2)
 #plt.scatter(LPNSarray[:,0], LENDaverageArray)
 '''plt.scatter(LPNSarray[:,0], group1)
 plt.scatter(LPNSarray[:,0], group1)
@@ -118,9 +114,6 @@ So it's not every 8 I want to average, it's 8 bands 720 apart.
 So I'll add rows 720 apart, until there are 8, then average them into a band.
 This should work. This is confirmed by the nested for loop in the next docustring
 '''
-print(LENDarray)
-print(LPNSarray)
-#row 0 from LPNS, row 2 from LEND.
 ''''
 for initial in range(720):
     for row in range(int(LPNSarray.shape[0]/720)):
@@ -153,41 +146,42 @@ for iteration in range(int(LPNSarray.shape[0]/(720))): #get the entire south pol
             addedCounts = addedCounts+1
             LENDbinnedArray[int((itAddOn+inAddOn)/8)] = LENDbinnedArray[int((itAddOn+inAddOn)/8)]/added
             added=0
-print("final index after loop ", int((itAddOn+inAddOn+row)))
-print(LPNSarray)
 combinedArray = [[0]*28800, [0]*28800]
 combinedArray [0] = LENDbinnedArray
 combinedArray [1] = LPNSarray[:,0]
 for a in range(len(LENDbinnedArray)):
     if LENDbinnedArray[a]==0:
         zeros = zeros+1
-print(zeros, " zeroes and addedCounts is ", addedCounts, " and ", unbinnedZero, " unbinnedZeros" )
-print(len(LENDbinnedArray))
-print(LENDbinnedArray)
 #now to filter out the 0s
 combinedArray = np.array(combinedArray)
 LENDbinnedArray = np.array(LENDbinnedArray)
 zeroIndices = np.where(LENDbinnedArray<.1)[0]
 combinedArray = np.delete(combinedArray, zeroIndices, 1)
-print("zeros are at ", zeroIndices)
 #now to convert the ppm to wt%. 1wt% = 1111.11111ppm.
 #Thus we need to divide the LPNS data by this number
 combinedArray[1] = combinedArray[1]/(50/.045)
 '''now for a line of y=x. The max value of either dataset is .12 wt% so I'll
 use an array that goes uniformly from 0 to that value. then I want to sort
 the array by ascending second row (LPNS), thus sort by columns
-'''
 combinedArray = combinedArray.sort(lambda x:x[1])
 #now I need to find the indices where LPNS changes and average those bins
-indices = wehAnalysis.findlatchanges(combinedArray[1])
+indices = findlatchanges(combinedArray[1])
+indices = indices.astype(int)
 #now average each lend measurement binned by LPNS
-combinedArray[0] = wehAnalysis.findAverageWEH(indices, combinedArray[0])
+averagedLEND = findAverageWEH(indices, combinedArray[0])
 sortedLPNS = np.array(combinedArray[1])
-combinedArray[1] = sortedLPNS[indices]
+sortedLPNS = sortedLPNS[indices]
+averagedAndSorted = [[averagedLEND], [sortedLPNS]]
 print("LEND array is now length ", len(combinedArray[0]))
 print("LPNS array is now length ", len(combinedArray[1]))
+plt.scatter(averagedLEND, sortedLPNS, label = "Data Averaged by LPNS values")
+'''
+#
+m, b = np.polyfit(combinedArray[0], combinedArray[1], 1)
 plt.scatter(combinedArray[0], combinedArray[1],
- label = "Binned Data from LEND and Lunar Prospector")
+label = "Binned Data from LEND and Lunar Prospector")
+regressionLabel = "Least Squares Linear regression. y = "+ str(np.around(m, 4))+"x+"+ str(np.around(b, 4))
+plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel)
 secondLine = np.array(range(28800))
 secondLine = secondLine+1
 secondLine = secondLine*.5/28800

@@ -99,8 +99,6 @@ def findlatchanges(latitude):
         if(not row == previous):
             rowlatChange = np.append(rowlatChange, counter)
             #the counters keep replacing each other. weird.
-            print(counter, rowlatChange)
-            print("different latitude detected")
         counter = counter+1
         previous = row
     return rowlatChange
