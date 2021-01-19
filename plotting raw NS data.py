@@ -10,6 +10,7 @@ from osgeo import gdal
 import rasterio
 from rasterio.plot import show
 import struct
+from matplotlib.colors import LogNorm
 '''
 Instead of averaging, I'm going to bin the LEND data by the LPNS data.
 These are the raw data I was sent by Sanin and Lawrence.
@@ -162,8 +163,25 @@ print(zeros, " zeroes and addedCounts is ", addedCounts, " and ", unbinnedZero, 
 print(len(LENDbinnedArray))
 print(LENDbinnedArray)
 #now to filter out the 0s
+combinedArray = np.array(combinedArray)
+LENDbinnedArray = np.array(LENDbinnedArray)
+zeroIndices = np.where(LENDbinnedArray<.1)[0]
+combinedArray = np.delete(combinedArray, zeroIndices, 1)
+print("zeros are at ", zeroIndices)
+#now to convert the ppm to wt%. 1wt% = 1111.11111ppm.
+#Thus we need to divide the LPNS data by this number
+combinedArray[1] = combinedArray[1]/(50/.045)
+#now for a dummy line of y=x
 
+plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
 plt.scatter(combinedArray[0], combinedArray[1])
-plt.xlabel('LEND Enriched Hydrogen (ppm)')
+plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
+plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
+plt.show()
+fig, ax = plt.subplots()
+h = ax.hist2d(combinedArray[0],  combinedArray[1], bins=40, norm=LogNorm())
+fig.colorbar(h[3], ax=ax)
+plt.title("Density plot of LEND and Lunar Prospector Hydrogen Abundance")
+plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
 plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
 plt.show()
