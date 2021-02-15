@@ -157,9 +157,15 @@ combinedArray = np.array(combinedArray)
 LENDbinnedArray = np.array(LENDbinnedArray)
 zeroIndices = np.where(LENDbinnedArray<.1)[0]
 combinedArray = np.delete(combinedArray, zeroIndices, 1)
+print(np.average(combinedArray[0]))
+print(np.average(combinedArray[1]))
+combinedArray[0] = combinedArray[0]/np.average(combinedArray[0])
+combinedArray[1] = combinedArray[1]/np.average(combinedArray[1])
+print(np.average(combinedArray[0]))
+print(np.average(combinedArray[1]))
 #now to convert the ppm to wt%. 1wt% = 1111.11111ppm.
 #Thus we need to divide the LPNS data by this number
-combinedArray[1] = combinedArray[1]/(50/.045)
+#combinedArray[1] = combinedArray[1]/(50/.045)
 '''now for a line of y=x. The max value of either dataset is .12 wt% so I'll
 use an array that goes uniformly from 0 to that value. then I want to sort
 the array by ascending second row (LPNS), thus sort by columns
@@ -178,15 +184,18 @@ plt.scatter(averagedLEND, sortedLPNS, label = "Data Averaged by LPNS values")
 '''
 #
 m, b = np.polyfit(combinedArray[0], combinedArray[1], 1)
-plt.scatter(combinedArray[0], combinedArray[1],
-label = "Binned Data from LEND and Lunar Prospector")
+print(m,b)
+correlationMatrix = np.corrcoef(combinedArray[1], combinedArray[0])
+print(correlationMatrix)
 regressionLabel = "Least Squares Linear regression. y = "+ str(np.around(m, 4))+"x+"+ str(np.around(b, 4))
-plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel)
 secondLine = np.array(range(28800))
 secondLine = secondLine+1
-secondLine = secondLine*.5/28800
+secondLine = secondLine*2.5/28800
 secondLine = secondLine
 plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%")
+plt.scatter(combinedArray[0], combinedArray[1],
+label = "Binned Data from LEND and Lunar Prospector")
+plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel)
 plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
 plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
 plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
