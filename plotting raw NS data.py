@@ -12,8 +12,6 @@ from rasterio.plot import show
 import struct
 from scipy import stats
 from matplotlib.colors import LogNorm
-#wehAnalysis = "C:\\Users\\engin\\Documents\\GitHub\Moon-Ice-Project-Ehlmann-Group\\weh_analysis_from_lawrence.py"
-#exec(open(wehAnalysis).read())
 '''
 Instead of averaging, I'm going to bin the LEND data by the LPNS data.
 These are the raw data I was sent by Sanin and Lawrence.
@@ -22,11 +20,8 @@ LENDarray = np.asarray(pd.read_csv('C:\\Users\\engin\\LENDSouth.csv'))
 LPNSarray = np.asarray(pd.read_csv('C:\\Users\\engin\\PolarfilteredLunarProspector.csv'))
 '''print(LENDarray.dtype)#float64
 print(LPNSarray.dtype)#float64 '''
-#print(LPNSarray[28800,])
 LPNSarray = LPNSarray[0:28800,:]
 #only leaves the south pole
-#print(LENDarray[0][2]) #wt%
-#print(LPNSarray[0][0]) #WEH ppm
 LENDlonglat = LENDarray[:,0:2]
 LPNSlonglat = LPNSarray[:,1:3]
 LENDaverageArray = [0]*28800
