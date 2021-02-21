@@ -16,10 +16,11 @@ from matplotlib.colors import LogNorm
 Instead of averaging, I'm going to bin the LEND data by the LPNS data.
 These are the raw data I was sent by Sanin and Lawrence.
 '''
-LENDarray = np.asarray(pd.read_csv('C:\\Users\\engin\\LENDSouth.csv'))
-LPNSarray = np.asarray(pd.read_csv('C:\\Users\\engin\\PolarfilteredLunarProspector.csv'))
-'''print(LENDarray.dtype)#float64
-print(LPNSarray.dtype)#float64 '''
+LENDfilepath = 'C:\\Users\\engin\\LENDSouth.csv'
+LPNSfilepath = 'C:\\Users\\engin\\PolarfilteredLunarProspector.csv'
+LENDarray = np.asarray(pd.read_csv(LENDfilepath))
+LPNSarray = np.asarray(pd.read_csv(LPNSfilepath))
+
 LPNSarray = LPNSarray[0:28800,:]
 #only leaves the south pole
 LENDlonglat = LENDarray[:,0:2]
@@ -84,27 +85,31 @@ secondLine = secondLine+1
 secondLine = secondLine*np.max(combinedArray[1])/28800
 secondLine = secondLine
 #this is just to move the y=x line into the right part of the graph
-plt.scatter(combinedArray[0], combinedArray[1],
-label = "Binned Data from LEND and Lunar Prospector")
-plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel)
-plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%")
-plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
-plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
-plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
-plt.legend()
-#plt.show()
-fig, ax = plt.subplots()
-h = ax.hist2d(combinedArray[0],  combinedArray[1], bins = 50)
-print(combinedArray[0])
-print(combinedArray[1])
-plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%", color = 'r')
-plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel, color = 'w')
-plt.scatter(combinedArray[0], .75*combinedArray[0] + .35, label = "Connecting points of maximum density. y = .75x+.35")
-fig.colorbar(h[3], ax=ax)
-plt.title("Density plot of LEND and Lunar Prospector Hydrogen Abundance")
-plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
-plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
-plt.legend()
-plt.show()
+def plotRawData(combinedArray):
+    plt.scatter(combinedArray[0], combinedArray[1],
+    label = "Binned Data from LEND and Lunar Prospector")
+    plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel)
+    plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%")
+    plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
+    plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
+    plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
+    plt.legend()
+    plt.show()
+def makeDensityPlot(combinedArray):
+    fig, ax = plt.subplots()
+    h = ax.hist2d(combinedArray[0],  combinedArray[1], bins = 50)
+    print(combinedArray[0])
+    print(combinedArray[1])
+    plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%", color = 'r')
+    plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel, color = 'w')
+    plt.scatter(combinedArray[0], .75*combinedArray[0] + .35, label = "Connecting points of maximum density. y = .75x+.35")
+    fig.colorbar(h[3], ax=ax)
+    plt.title("Density plot of LEND and Lunar Prospector Hydrogen Abundance")
+    plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
+    plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
+    plt.legend()
+    plt.show()
 '''the two highest density spots are near (.1,.06) and (1.4,1.4). m=.6/.8=.75.
 b=.8-.6*.75 = .35'''
+plotRawData(combinedArray)
+makeDensityPlot(combinedArray)
