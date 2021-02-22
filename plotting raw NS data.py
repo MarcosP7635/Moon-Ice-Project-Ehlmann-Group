@@ -18,9 +18,15 @@ These are the raw data I was sent by Sanin and Lawrence.
 '''
 LENDfilepath = 'C:\\Users\\engin\\LENDSouth.csv'
 LPNSfilepath = 'C:\\Users\\engin\\PolarfilteredLunarProspector.csv'
-LENDarray = np.asarray(pd.read_csv(LENDfilepath))
-LPNSarray = np.asarray(pd.read_csv(LPNSfilepath))
-
+#Using more recent LPNS modelling
+#LPNSfilepath = 'C:\\Users\\engin\\Downloads\\LPNS2018\\LPNS2018.csv'
+def openCSVasFloatArray(filepath):
+    array = np.asarray(pd.read_csv(filepath))
+#    for column in range(array.shape[1]):
+#        array[column] = array[column].astype(np.float)
+    return array
+LENDarray = openCSVasFloatArray(LENDfilepath)
+LPNSarray = openCSVasFloatArray(LPNSfilepath)
 LPNSarray = LPNSarray[0:28800,:]
 #only leaves the south pole
 LENDlonglat = LENDarray[:,0:2]
@@ -69,12 +75,20 @@ for a in range(len(LENDbinnedArray)):
 #now to filter out the 0s
 combinedArray = np.array(combinedArray)
 LENDbinnedArray = np.array(LENDbinnedArray)
-zeroIndices = np.where(LENDbinnedArray<.1)[0]
+zeroIndices = np.where(LENDbinnedArray==0)[0]
 combinedArray = np.delete(combinedArray, zeroIndices, 1)
 #now to convert the ppm to wt%. 1wt% = 1111.11111ppm.
 #Thus we need to divide the LPNS data by this number
-conversion = 1/(50/.045)
+print(combinedArray[0])
+print(combinedArray[1])
+print("hello")
+conversion = 9/(1*(10**4))
 combinedArray[1] = combinedArray[1]*conversion
+'''
+the next step would instead change the reference area in Sanin et al 2017
+to the average of the LPNS data rather than the average of the Apollo samples
+#combinedArray[1] = combinedArray[1]*87.30911597036007/50
+'''
 m, b = np.polyfit(combinedArray[0], combinedArray[1], 1)
 print(m,b)
 correlationMatrix = np.corrcoef(combinedArray[1], combinedArray[0])
@@ -85,7 +99,7 @@ secondLine = secondLine+1
 secondLine = secondLine*np.max(combinedArray[1])/28800
 secondLine = secondLine
 #this is just to move the y=x line into the right part of the graph
-def plotRawData(combinedArray):
+def plotRawDataRegression(combinedArray):
     plt.scatter(combinedArray[0], combinedArray[1],
     label = "Binned Data from LEND and Lunar Prospector")
     plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel)
@@ -94,22 +108,58 @@ def plotRawData(combinedArray):
     plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
     plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
     plt.legend()
+    #plt.show()
+def makeScatterPlot(arrayX, arrayY, xAxis, yAxis, lineArray, labelArray, colorArray):
+    plt.scatter(arrayX,arrayY)
+    if(lineArray,labelArray):
+        for i in range(len(lineArray)):
+            plt.scatter(arrayX, lineArray[i], label = labelArray[i], color = colorArray[i])
+    plt.xlabel(xAxis)
+    plt.ylabel(yAxis)
+    plt.legend()
     plt.show()
-def makeDensityPlot(combinedArray):
+def makeDensityPlots(combinedArray):
     fig, ax = plt.subplots()
     h = ax.hist2d(combinedArray[0],  combinedArray[1], bins = 50)
     print(combinedArray[0])
     print(combinedArray[1])
+    m1 = .047/.15
+    b1 = .06-.0047/.15
     plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%", color = 'r')
     plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel, color = 'w')
-    plt.scatter(combinedArray[0], .75*combinedArray[0] + .35, label = "Connecting points of maximum density. y = .75x+.35")
+    plt.scatter(combinedArray[0],m1*combinedArray[0] +b1, label = "Connecting points of maximum density. y = "+ str(np.around(m1, 4)) +"x+ " + str(np.around(b1, 4)), color = 'black')
     fig.colorbar(h[3], ax=ax)
     plt.title("Density plot of LEND and Lunar Prospector Hydrogen Abundance")
     plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
     plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
     plt.legend()
+    #plt.show()
+def makeDensityPlot(arrayX, arrayY, xAxis, yAxis, lineArray, labelArray, colorArray):
+    fig, ax = plt.subplots()
+    h = ax.hist2d(arrayX,  arrayY, bins = 50)
+    if(lineArray,labelArray):
+        for i in range(len(lineArray)):
+            plt.scatter(arrayX, lineArray[i], label = labelArray[i], color = colorArray[i])
+    plt.xlabel(xAxis)
+    plt.ylabel(yAxis)
+    plt.legend()
     plt.show()
-'''the two highest density spots are near (.1,.06) and (1.4,1.4). m=.6/.8=.75.
-b=.8-.6*.75 = .35'''
-plotRawData(combinedArray)
-makeDensityPlot(combinedArray)
+'''
+the two highest density spots are near (.10,.06) and (.25,.11). m=.05/.15.
+b=.06-.005/.15
+'''
+residualLeastsquare = combinedArray[1]-(m*combinedArray[0] + b)
+plt.scatter(combinedArray[0], residualLeastsquare)
+plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
+plt.ylabel('Residual of ' + regressionLabel)
+plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
+fig, ax = plt.subplots()
+h = ax.hist2d(combinedArray[0], residualLeastsquare, bins = 50)
+fig.colorbar(h[3], ax=ax)
+plt.legend()
+plt.show()
+plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
+plt.ylabel('Residual of ' + regressionLabel)
+plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
+plotRawDataRegression(combinedArray)
+makeDensityPlots(combinedArray)
