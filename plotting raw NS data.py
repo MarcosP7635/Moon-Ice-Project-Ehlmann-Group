@@ -96,7 +96,7 @@ print(correlationMatrix)
 regressionLabel = "Least Squares Linear regression. y = "+ str(np.around(m, 4))+"x+"+ str(np.around(b, 4)) + ". r^2 = " + str(np.around(correlationMatrix[0,1]**2, 4))
 secondLine = np.array(range(28800))
 secondLine = secondLine+1
-secondLine = secondLine*np.max(combinedArray[1])/28800
+secondLine = secondLine*np.max(combinedArray[0])/28800
 secondLine = secondLine
 #this is just to move the y=x line into the right part of the graph
 def plotRawDataRegression(combinedArray):
@@ -119,13 +119,18 @@ def makeScatterPlot(arrayX, arrayY, xAxis, yAxis, lineArray, labelArray, colorAr
     plt.legend()
     plt.show()
 def makeDensityPlots(combinedArray):
+    secondLine = np.array(range(28800))
+    secondLine = secondLine+1
+    secondLine = secondLine*np.max(combinedArray[1])/28800
+    secondLine = np.delete(secondLine, zeroIndices)
     fig, ax = plt.subplots()
     h = ax.hist2d(combinedArray[0],  combinedArray[1], bins = 50)
     print(combinedArray[0])
     print(combinedArray[1])
     m1 = .047/.15
     b1 = .06-.0047/.15
-    plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%", color = 'r')
+    otherlabel = "Reference Line y=x in wt%. r^2 = " + str(np.around(calculateRSquared(combinedArray[1], secondLine), 4)) + ", meaning it is less accurate than a horizontal line"
+    plt.scatter(secondLine, secondLine, label = otherlabel, color = 'r')
     plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel, color = 'w')
     #plt.scatter(combinedArray[0],m1*combinedArray[0] +b1, label = "Connecting points of maximum density. y = "+ str(np.around(m1, 4)) +"x+ " + str(np.around(b1, 4)), color = 'black')
     fig.colorbar(h[3], ax=ax)
@@ -149,19 +154,37 @@ the two highest density spots are near (.10,.06) and (.25,.11). m=.05/.15.
 b=.06-.005/.15
 '''
 residualLeastsquare = combinedArray[1]-(m*combinedArray[0] + b)
-plt.scatter(combinedArray[0], residualLeastsquare)
+'''plt.scatter(combinedArray[0], residualLeastsquare)
 plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
 plt.ylabel('Residual of ' + regressionLabel)
-plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
+plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')'''
 fig, ax = plt.subplots()
 h = ax.hist2d(combinedArray[0], residualLeastsquare, bins = 50)
 fig.colorbar(h[3], ax=ax)
 plt.legend()
-plt.show()
 plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
 plt.ylabel('Residual of Least Squares Linear Regression')
 plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
+plt.show()
+def calculateRSquared(arrayY, arrayFit):
+    sumOfSquares = np.sum((arrayY-np.average(arrayY))**2)
+    print("Sum of squares " + str(sumOfSquares))
+    sumOfSquareResiduals = np.sum((arrayY-arrayFit)**2)
+    print("Sum of square Residuals " + str(sumOfSquareResiduals))
+    Rsquared = 1 - (sumOfSquareResiduals/sumOfSquares)
+    return Rsquared
 plotRawDataRegression(combinedArray)
 makeDensityPlots(combinedArray)
-def calculateRSquared():
-    return
+#
+'''
+See this wikipedia article for how to calulate R^2
+https://en.wikipedia.org/wiki/Coefficient_of_determination
+'''
+secondLine = np.array(range(28800))
+secondLine = secondLine+1
+secondLine = secondLine*np.max(combinedArray[1])/28800
+secondLine = np.delete(secondLine, zeroIndices)
+print(calculateRSquared(combinedArray[1], secondLine))
+print(calculateRSquared(combinedArray[1], [np.average(combinedArray[1])]*len(combinedArray[1])))
+correlationMatrix = np.corrcoef(combinedArray[1], secondLine)
+print(correlationMatrix)
