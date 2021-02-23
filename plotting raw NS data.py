@@ -127,13 +127,13 @@ def makeDensityPlots(combinedArray):
     b1 = .06-.0047/.15
     plt.scatter(secondLine, secondLine, label = "Reference Line y=x in wt%", color = 'r')
     plt.scatter(combinedArray[0], m*combinedArray[0] + b, label = regressionLabel, color = 'w')
-    plt.scatter(combinedArray[0],m1*combinedArray[0] +b1, label = "Connecting points of maximum density. y = "+ str(np.around(m1, 4)) +"x+ " + str(np.around(b1, 4)), color = 'black')
+    #plt.scatter(combinedArray[0],m1*combinedArray[0] +b1, label = "Connecting points of maximum density. y = "+ str(np.around(m1, 4)) +"x+ " + str(np.around(b1, 4)), color = 'black')
     fig.colorbar(h[3], ax=ax)
     plt.title("Density plot of LEND and Lunar Prospector Hydrogen Abundance")
     plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
     plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
     plt.legend()
-    #plt.show()
+    plt.show()
 def makeDensityPlot(arrayX, arrayY, xAxis, yAxis, lineArray, labelArray, colorArray):
     fig, ax = plt.subplots()
     h = ax.hist2d(arrayX,  arrayY, bins = 50)
@@ -159,7 +159,9 @@ fig.colorbar(h[3], ax=ax)
 plt.legend()
 plt.show()
 plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
-plt.ylabel('Residual of ' + regressionLabel)
+plt.ylabel('Residual of Least Squares Linear Regression')
 plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
 plotRawDataRegression(combinedArray)
 makeDensityPlots(combinedArray)
+def calculateRSquared():
+    return
