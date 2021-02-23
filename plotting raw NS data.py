@@ -108,7 +108,7 @@ def plotRawDataRegression(combinedArray):
     plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
     plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
     plt.legend()
-    #plt.show()
+    ##plt.show()
 def makeScatterPlot(arrayX, arrayY, xAxis, yAxis, lineArray, labelArray, colorArray):
     plt.scatter(arrayX,arrayY)
     if(lineArray,labelArray):
@@ -117,7 +117,7 @@ def makeScatterPlot(arrayX, arrayY, xAxis, yAxis, lineArray, labelArray, colorAr
     plt.xlabel(xAxis)
     plt.ylabel(yAxis)
     plt.legend()
-    plt.show()
+    ##plt.show()
 def makeDensityPlots(combinedArray):
     secondLine = np.array(range(28800))
     secondLine = secondLine+1
@@ -138,7 +138,7 @@ def makeDensityPlots(combinedArray):
     plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
     plt.ylabel(r'Lunar Prospector Enriched Hydrogen wt%')
     plt.legend()
-    plt.show()
+    #plt.show()
 def makeDensityPlot(arrayX, arrayY, xAxis, yAxis, lineArray, labelArray, colorArray):
     fig, ax = plt.subplots()
     h = ax.hist2d(arrayX,  arrayY, bins = 50)
@@ -148,7 +148,7 @@ def makeDensityPlot(arrayX, arrayY, xAxis, yAxis, lineArray, labelArray, colorAr
     plt.xlabel(xAxis)
     plt.ylabel(yAxis)
     plt.legend()
-    plt.show()
+    #plt.show()
 '''
 the two highest density spots are near (.10,.06) and (.25,.11). m=.05/.15.
 b=.06-.005/.15
@@ -165,7 +165,7 @@ plt.legend()
 plt.title("Comparing Spatially Coregistered Lunar Prospector and LEND Hydrogen Abundance")
 plt.ylabel('Residual of Least Squares Linear Regression')
 plt.xlabel('Averaged LEND Enriched Hydrogen in wt%(zeros omitted)')
-plt.show()
+#plt.show()
 def calculateRSquared(arrayY, arrayFit):
     sumOfSquares = np.sum((arrayY-np.average(arrayY))**2)
     print("Sum of squares " + str(sumOfSquares))
@@ -188,3 +188,21 @@ print(calculateRSquared(combinedArray[1], secondLine))
 print(calculateRSquared(combinedArray[1], [np.average(combinedArray[1])]*len(combinedArray[1])))
 correlationMatrix = np.corrcoef(combinedArray[1], secondLine)
 print(correlationMatrix)
+#(.251,.106) (.104,.062)
+pointArray = np.array([.251,.106,.104,.062])
+mNew = (pointArray[3]-pointArray[1])/(pointArray[2]-pointArray[0])
+bNew = pointArray[1]-(mNew*pointArray[0])
+print(calculateRSquared(combinedArray[1], mNew*combinedArray[0]+bNew))
+logFit = np.polyfit(np.log(combinedArray[0]),combinedArray[1],1)
+print(calculateRSquared(combinedArray[1], logFit[0]*np.log(combinedArray[0])+logFit[1]))
+logFit = np.polyfit(1/(combinedArray[0]),combinedArray[1],1)
+print(calculateRSquared(combinedArray[1], (logFit[0]/combinedArray[0])+logFit[1]))
+a = combinedArray[0]**-2
+logFit = np.polyfit(a,combinedArray[1],1)
+print(calculateRSquared(combinedArray[1], (logFit[0]*a)+logFit[1]))
+def polyfitRsquared(a, b):
+    logFit = np.polyfit(a,b,1)
+    output = calculateRSquared(combinedArray[1], (logFit[0]*a)+logFit[1])
+    print(output)
+    return output
+polyfitRsquared(combinedArray[0]**(1/(2**1)), combinedArray[1])
